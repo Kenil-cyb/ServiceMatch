@@ -107,6 +107,18 @@ test("provider response normalization matches backend fields", () => {
 });
 
 test("API failures are surfaced rather than converted into success data", async t => {
+  await t.test("preserves a successful empty matching result as an empty result", async () => {
+    const response = await requestJson(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({ success: true, count: 0, data: [] }),
+    }), "https://backend.example.test/api/match", {});
+
+    assert.equal(response.success, true);
+    assert.equal(response.count, 0);
+    assert.deepEqual(response.data, []);
+  });
+
   await t.test("preserves backend error responses and status codes", async () => {
     await assert.rejects(
       requestJson(async () => ({

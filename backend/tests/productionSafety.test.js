@@ -10,6 +10,13 @@ import { startServer } from "../src/server.js";
 import Provider from "../src/models/Provider.js";
 import { generateToken } from "../src/middleware/authMiddleware.js";
 import { fallbackUsers } from "../src/controllers/authController.js";
+import { getTrustedProxyHops } from "../src/config/proxyTrust.js";
+
+test("proxy trust is limited to the production Render proxy hop", () => {
+  assert.equal(getTrustedProxyHops("production"), 1);
+  assert.equal(getTrustedProxyHops("development"), false);
+  assert.equal(getTrustedProxyHops("test"), false);
+});
 
 async function withProductionEnv(run, mongoURI) {
   const keys = ["NODE_ENV", "JWT_SECRET", "MONGODB_URI"];

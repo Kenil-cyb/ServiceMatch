@@ -3,8 +3,11 @@ import express from "express";
 import cors from "cors";
 import apiRoutes from "./routes/apiRoutes.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorMiddleware.js";
+import { getTrustedProxyHops } from "./config/proxyTrust.js";
 
 const app = express();
+
+app.set("trust proxy", getTrustedProxyHops());
 
 // Configure CORS
 const allowedOrigins = (process.env.FRONTEND_ORIGIN || "http://localhost:5173")

@@ -96,6 +96,7 @@ function App() {
   const [recommendations, setRecommendations] = useState([]);
   const [loadingProviders, setLoadingProviders] = useState(true);
   const [providerError, setProviderError] = useState("");
+  const [matchingError, setMatchingError] = useState("");
   const [providersAreDemo, setProvidersAreDemo] = useState(false);
   const [matchesAreDemo, setMatchesAreDemo] = useState(false);
   const [matching, setMatching] = useState(false);
@@ -234,6 +235,7 @@ function App() {
     }
 
     setMessage("");
+    setMatchingError("");
     setMatching(true);
     setSearched(true);
 
@@ -262,7 +264,7 @@ function App() {
       } else {
         setRecommendations([]);
         setMatchesAreDemo(false);
-        setMessage("Matching is temporarily unavailable. Please try again later.");
+        setMatchingError("Matching is temporarily unavailable. Please try again later.");
       }
     } finally {
       setMatching(false);
@@ -503,10 +505,11 @@ function App() {
 
           {loadingProviders && <p className="subtle-text" role="status">Loading service providers...</p>}
           {providerError && <p className="error-message" role="alert">{providerError}</p>}
-          {!loadingProviders && !providerError && recommendations.length === 0 && (
+          {matchingError && <p className="error-message" role="alert">{matchingError}</p>}
+          {!loadingProviders && !providerError && !matching && !matchingError && recommendations.length === 0 && (
             <div className="empty-bookings">
-              <h3>No providers available</h3>
-              <p>Please try again later.</p>
+              <h3>{searched ? "No matching providers found" : "No providers available"}</h3>
+              <p>{searched ? "Try adjusting your service request and search again." : "Please check back later."}</p>
             </div>
           )}
 
