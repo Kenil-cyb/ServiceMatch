@@ -1,0 +1,28 @@
+{
+  "name": "servicematch-backend",
+  "version": "1.0.0",
+  "description": "Backend REST API for ServiceMatch AI marketplace",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test:unit": "node tests/backend.test.js && node --test tests/productionSafety.test.js",
+    "test:db": "node tests/mongoIntegration.test.js",
+    "test": "node tests/backend.test.js && node tests/mongoIntegration.test.js"
+  },
+  "dependencies": {
+    "@google/genai": "^2.28.0",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.7.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.11.1"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.3.0",
+    "supertest": "^7.0.0"
+  }
+}
