@@ -6,6 +6,7 @@
  */
 
 import { MongoMemoryServer } from "mongodb-memory-server";
+import assert from "node:assert/strict";
 import mongoose from "mongoose";
 import request from "supertest";
 import app from "../src/app.js";
@@ -16,6 +17,7 @@ import Review from "../src/models/Review.js";
 import { generateToken } from "../src/middleware/authMiddleware.js";
 import { submitReview } from "../src/services/reviewService.js";
 import { isDBConnected } from "../src/config/db.js";
+import { demoSeedProviders, seedDemoData } from "../src/config/seed.js";
 
 async function runMongoIntegrationTests() {
   console.log("╔══════════════════════════════════════════════════════════════╗");
@@ -44,6 +46,8 @@ async function runMongoIntegrationTests() {
   let mongoUri = null;
 
   try {
+    process.env.NODE_ENV = "test";
+
     // ── Setup in-memory test database ──────────────────────────────────────
     section("1. Test Database Environment Setup");
     mongoServer = await MongoMemoryServer.create();
@@ -59,6 +63,51 @@ async function runMongoIntegrationTests() {
     isDBConnected()
       ? pass("Connected to isolated MongoMemoryServer instance")
       : fail("Mongoose connection failed");
+
+    // ── 1.1 Explicit, repeatable demo provider seed ─────────────────────────
+    section("1.1 Demo Provider Seed & API Integration");
+    try {
+      assert.equal(await seedDemoData(), true);
+      assert.equal(await seedDemoData(), true);
+      assert.equal(await Provider.countDocuments({ isDemoData: true }), demoSeedProviders.length);
+      pass(`Seeded ${demoSeedProviders.length} demo providers without duplicates on rerun`);
+
+      const providersResponse = await request(app).get("/api/providers");
+      assert.equal(providersResponse.status, 200);
+      assert.equal(providersResponse.body.count, demoSeedProviders.length);
+      assert.equal(providersResponse.body.data.every(provider => provider.isDemoData), true);
+      pass("GET /api/providers returns all explicitly seeded demo providers");
+
+      const previousGeminiKey = process.env.GEMINI_API_KEY;
+      delete process.env.GEMINI_API_KEY;
+      try {
+        const acResponse = await request(app)
+          .post("/api/match")
+          .send({ query: "ac cleaning", selectedService: "", useAI: true });
+        assert.equal(acResponse.status, 200);
+        assert.equal(acResponse.body.query.selectedService, "AC Repair");
+        assert.ok(acResponse.body.count > 0);
+        assert.ok(acResponse.body.data[0].service.includes("AC Repair"));
+        pass("POST /api/match recognizes 'ac cleaning' and ranks AC repair providers first");
+      } finally {
+        if (previousGeminiKey === undefined) delete process.env.GEMINI_API_KEY;
+        else process.env.GEMINI_API_KEY = previousGeminiKey;
+      }
+
+      for (const category of ["AC Repair", "Plumbing", "Electrical", "Cleaning", "Computer Repair", "Car Repair"]) {
+        const categoryResponse = await request(app)
+          .post("/api/match")
+          .send({ query: "", selectedService: category, useAI: false });
+        assert.equal(categoryResponse.status, 200);
+        assert.ok(
+          categoryResponse.body.data[0].service.includes(category),
+          `${category} ranked ${categoryResponse.body.data[0].service} first`
+        );
+      }
+      pass("Matching ranks a relevant provider first for every supported service category");
+    } catch (error) {
+      fail("Demo seed and API integration", error.message);
+    }
 
     // Seed authoritative test provider
     const testProvider = await Provider.create({

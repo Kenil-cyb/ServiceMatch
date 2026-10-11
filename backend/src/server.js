@@ -3,22 +3,13 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import app from "./app.js";
 import { connectDB } from "./config/db.js";
-import { seedDemoData } from "./config/seed.js";
-import { isProduction, validateStartupEnv } from "./config/env.js";
+import { validateStartupEnv } from "./config/env.js";
 
 const PORT = process.env.PORT || 5000;
 
 export async function startServer() {
   validateStartupEnv();
-  const connected = await connectDB();
-
-  if (isProduction() && !connected) {
-    throw new Error("MongoDB is required to start in production.");
-  }
-
-  if (connected && !isProduction()) {
-    await seedDemoData();
-  }
+  await connectDB();
 
   const server = app.listen(PORT, () => {
     console.log(`🚀 ServiceMatch AI Backend server running on http://localhost:${PORT}`);

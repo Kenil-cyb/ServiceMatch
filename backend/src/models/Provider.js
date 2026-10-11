@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 const ProviderSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    seedKey: { type: String, trim: true },
+    isDemoData: { type: Boolean, default: false },
     name: { type: String, required: true, trim: true },
     service: { type: String, required: true },
     skills: [{ type: String }],
@@ -28,5 +30,6 @@ const ProviderSchema = new mongoose.Schema(
 
 ProviderSchema.index({ service: 1 });
 ProviderSchema.index({ available: 1 });
+ProviderSchema.index({ seedKey: 1 }, { unique: true, sparse: true });
 
 export default mongoose.model("Provider", ProviderSchema);

@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
+    "seed:demo": "node scripts/seed-demo-data.js",
     "test:unit": "node tests/backend.test.js && node --test tests/productionSafety.test.js",
     "test:db": "node tests/mongoIntegration.test.js",
     "test": "node tests/backend.test.js && node tests/mongoIntegration.test.js"

@@ -101,6 +101,37 @@ In Vercel, set `VITE_API_BASE_URL` to your actual Render backend's public origin
 `/api` automatically, and Vite embeds this public URL at build time. Never put
 backend secrets in `VITE_` variables. See [frontend/.env.example](./frontend/.env.example).
 
+### Seed Local Demo Providers
+
+Demo providers are never seeded when the backend starts. To add the 18 fictional,
+clearly labeled demo providers to a local MongoDB database:
+
+1. Start a local MongoDB instance and configure `backend/.env` with
+   `NODE_ENV=development` and a local `MONGODB_URI`, for example
+   `mongodb://127.0.0.1:27017/servicematch`.
+2. From the `backend` directory, deliberately run:
+
+   ```powershell
+   $env:SEED_DEMO_DATA = "true"
+   npm run seed:demo
+   Remove-Item Env:SEED_DEMO_DATA
+   ```
+
+   The script prints the target host/database, accepts only local MongoDB hosts,
+   and requires `SEED_DEMO_DATA=true`. It refuses production mode and remote
+   MongoDB hosts. It uses stable seed keys and inserts only missing demo records;
+   it does not update or delete existing providers.
+3. Start the backend normally with `npm run dev`. It will not seed data on
+   startup. Re-run the explicit seed command whenever you want to add any
+   missing demo records.
+4. Verify the list at `http://localhost:5000/api/providers`. To verify matching,
+   send `POST http://localhost:5000/api/match` with JSON
+   `{"query":"ac cleaning","selectedService":"","useAI":true}`.
+
+The provider schema has no description or contact fields, so seed records use
+only supported fields. Their rating, review count, and completed-job count are
+zero; demo metrics do not represent customer feedback or completed work.
+
 ---
 
 ## Secret Rotation & Token Invalidation Procedure

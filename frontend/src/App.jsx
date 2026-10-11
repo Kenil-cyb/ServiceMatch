@@ -516,6 +516,9 @@ function App() {
           <div className="provider-grid">
             {recommendations.map((provider, index) => (
               <article className="provider-card" key={provider.id}>
+                {provider.isDemoData && (
+                  <div className="demo-provider-badge">DEMO DATA</div>
+                )}
                 {index === 0 && (
                   <div className="best-match-badge">✦ BEST MATCH</div>
                 )}

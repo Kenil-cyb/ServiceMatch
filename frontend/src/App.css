@@ -486,6 +486,19 @@ a {
   letter-spacing: 0.4px;
 }
 
+.demo-provider-badge {
+  position: absolute;
+  top: -11px;
+  left: 13px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  color: #684a00;
+  background: #fff1c2;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+}
+
 .provider-top {
   display: flex;
   align-items: center;
